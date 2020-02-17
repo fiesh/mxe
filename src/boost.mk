@@ -14,6 +14,9 @@ $(PKG)_DEPS     := cc bzip2 expat zlib
 
 $(PKG)_DEPS_$(BUILD) := zlib
 
+# Generate the stupid x32 / x64 Windows style architecture suffix
+$(PKG)_TARGET_SUFFIX := $(if $(findstring x86_64,$(TARGET)),-x64,-x32)
+
 define $(PKG)_UPDATE
     $(WGET) -q -O- 'https://www.boost.org/users/download/' | \
     $(SED) -n 's,.*/release/\([0-9][^"/]*\)/.*,\1,p' | \
@@ -72,10 +75,10 @@ define $(PKG)_BUILD
         -W -Wall -Werror -ansi -U__STRICT_ANSI__ -pedantic \
         '$(PWD)/src/$(PKG)-test.cpp' -o '$(PREFIX)/$(TARGET)/bin/test-boost.exe' \
         -DBOOST_THREAD_USE_LIB \
-        -lboost_serialization-mt-x32 \
-        -lboost_system-mt-x32 \
-        -lboost_chrono-mt-x32 \
-        -lboost_context-mt-x32
+        -lboost_serialization-mt$($(PKG)_TARGET_SUFFIX) \
+        -lboost_system-mt$($(PKG)_TARGET_SUFFIX) \
+        -lboost_chrono-mt$($(PKG)_TARGET_SUFFIX) \
+        -lboost_context-mt$($(PKG)_TARGET_SUFFIX)
 
     # test cmake
     mkdir '$(1).test-cmake'
